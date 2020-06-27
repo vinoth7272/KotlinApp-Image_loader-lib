@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.greedygameassesment.R
 import com.example.greedygameassesment.model.ApiImages
@@ -35,9 +36,9 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        holder.bind(apiImagesSourceHashMap[position], mImageUrls[position],activity)
+        holder.bind(mImageUrls[position],activity)
         holder.itemView.setOnClickListener { v ->
-            val intent :Intent = Intent(activity,FullImageActivity::class.java)
+            val intent = Intent(activity,FullImageActivity::class.java)
             val bundle = Bundle()
             bundle.putParcelable("URLS",mImageUrls[position] as Parcelable)
             intent.putExtra("Bundle",bundle)
@@ -47,14 +48,12 @@ class RecyclerViewAdapter(
 
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(
-            apiImages: ApiImages?,
             urls: ImageUrls,
             activity: MainActivity
         ) {
-            itemView.textView.visibility = View.GONE
-//            ImageLoader.displayImage(url, itemView.imageView1)
-            ImageLoader.with(activity).load(urls.thumbnailUrl,itemView.imageView1)
-//            itemView.textView.text = apiImages?.source?.url
+            val imageLoader = ImageLoader.with(activity)
+            imageLoader.load(urls.thumbnailUrl,itemView.imageView1)
+            imageLoader.placeholder(ContextCompat.getDrawable(activity,R.drawable.greedygamelogo))
         }
 
     }

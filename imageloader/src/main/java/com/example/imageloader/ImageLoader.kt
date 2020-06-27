@@ -3,24 +3,23 @@ package com.example.imageloader
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Handler
-import android.renderscript.ScriptGroup
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
-import androidx.arch.core.executor.TaskExecutor
-import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 
-class ImageLoader() {
 
+class ImageLoader {
+
+    private lateinit var defaultBitmap: Bitmap
     private lateinit var cache: ImageCache
-    var progressBar: ProgressBar? = null
+    private var progressBar: ProgressBar? = null
     private var executorService =
         Executors.newFixedThreadPool(5, Utils.ImageThreadFactory())
     private val handler: Handler = Handler()
@@ -43,7 +42,7 @@ class ImageLoader() {
     }
 
     fun load(url: String, imageView: ImageView, progressBar: ProgressBar) {
-        this.progressBar = progressBar;
+        this.progressBar = progressBar
         load(url, imageView)
     }
 
@@ -57,15 +56,27 @@ class ImageLoader() {
         executorService.submit(PhotosLoader(ImageRequest(url, imageView)))
     }
 
+    fun placeholder(drawable: Drawable?) {
+        if (drawable is BitmapDrawable) {
+            if (drawable.bitmap != null) {
+                defaultBitmap = drawable.bitmap
+            }
+        }
+    }
+
 
     private fun downloadUrl(url: String): Bitmap? {
-        var bitmap: Bitmap? = null
+        var bitmap: Bitmap?
         try {
             val imageUrl = URL(url)
             val connection: HttpURLConnection = imageUrl.openConnection() as HttpURLConnection
             bitmap = BitmapFactory.decodeStream(connection.inputStream)
+            if (bitmap==null){
+                bitmap = defaultBitmap
+            }
             connection.disconnect()
         } catch (e: Exception) {
+            bitmap = defaultBitmap
             Log.d("Error", e.localizedMessage, e)
         }
         return bitmap
@@ -81,20 +92,15 @@ class ImageLoader() {
         progressBar?.let {
             progressBar?.visibility = View.GONE
         }
-
     }
-
-
 
     inner class ImageRequest(var imgUrl: String, var imageView: ImageView)
     inner class PhotosLoader(private var imageRequest: ImageRequest) : Runnable {
 
         override fun run() {
 
-//            val bitmap = Utils.downloadBitmapFromURL(imageRequest.imgUrl)
             val bitmap: Bitmap? = downloadUrl(imageRequest.imgUrl)
             cache.putCache(imageRequest.imgUrl, bitmap)
-
             val displayBitmap = DisplayBitmap(imageRequest)
             handler.post(displayBitmap)
         }

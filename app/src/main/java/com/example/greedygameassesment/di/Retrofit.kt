@@ -1,10 +1,7 @@
 package com.example.greedygameassesment.di
 
-import androidx.lifecycle.AndroidViewModel
 import com.example.greedygameassesment.network.NetworkApi
 import com.example.greedygameassesment.utils.Constant
-import com.example.greedygameassesment.viewmodel.DataRepository
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
