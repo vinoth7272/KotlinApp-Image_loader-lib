@@ -18,7 +18,6 @@ class ActivityViewModel(private var dataRepository: DataRepository) : ViewModel(
             override fun onFailure(error: String) {
                 baseResult.value = BaseResult.Failure(error)
             }
-
         })
     }
 
